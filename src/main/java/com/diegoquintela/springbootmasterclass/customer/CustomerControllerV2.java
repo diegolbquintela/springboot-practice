@@ -1,15 +1,16 @@
 package com.diegoquintela.springbootmasterclass.customer;
 
 
+import com.diegoquintela.springbootmasterclass.exception.ApiRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-
+import javax.validation.Valid;
 import java.util.List;
 
-@RequestMapping(path="api/v1/customer")
+@RequestMapping(path = "api/v2/customers")
 @RestController
-public class CustomerController {
+public class CustomerControllerV2 {
 
     // the controller shouldn't be responsible for handling business logic/validation
     // instead, it should be handling requests with the client, passing communicating with the service layer
@@ -25,7 +26,7 @@ public class CustomerController {
     ////step 2: constructor (use dependency injection)
     //inject a customerService inside the constructor instead
     @Autowired //we want to autowire/inject customerService in this constructor
-    public CustomerController(CustomerService customerService) {
+    public CustomerControllerV2(CustomerService customerService) {
         this.customerService = customerService;
     }
 
@@ -37,13 +38,26 @@ public class CustomerController {
 //    }
 
     ////step 3: the requests
-    @GetMapping(value = "all")
+    //request all customers
+    @GetMapping
     List<Customer> getCustomers() {
         return customerService.getCustomers();
     }
 
+    //request customer by id
+    @GetMapping(path = "{customerId}")
+    Customer getCustomer(@PathVariable("customerId") Long id) {
+        return customerService.getCustomer(id);
+    }
+
+    //for testing exceptions
+    @GetMapping(path = "{customerId}/exception")
+    Customer getCustomerException(@PathVariable("customerId") Long id) {
+        throw new ApiRequestException("ApiRequestException for customer " + id);
+    }
+
     @PostMapping
-    void createNewCustomer(@RequestBody Customer customer) { //@RequestBody takes the Json payload and map it into customer
+    void createNewCustomer(@Valid @RequestBody Customer customer) { //@RequestBody takes the Json payload and map it into customer
         System.out.println("POST REQUEST...");
         System.out.println(customer);
     }
